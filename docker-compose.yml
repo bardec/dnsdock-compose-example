@@ -1,0 +1,30 @@
+dnsdock:
+    image: tonistiigi/dnsdock
+    volumes:
+        - /var/run/docker.sock:/run/docker.sock
+    ports:
+        - 172.17.42.1:53:53/udp
+
+ping:
+    image: python:3
+    volumes:
+        - app:/usr/lib/app
+    working_dir: /usr/lib/app
+    command: python -u app.py
+    environment:
+        - SERVER_TARGET=pong
+        - DNSDOCK_NAME=ping
+        - DNSDOCK_IMAGE=dnsdock
+    dns: 172.17.42.1
+
+pong:
+    image: python:3
+    volumes:
+        - app:/usr/lib/app
+    working_dir: /usr/lib/app
+    command: python -u app.py
+    environment:
+        - SERVER_TARGET=ping
+        - DNSDOCK_NAME=pong
+        - DNSDOCK_IMAGE=dnsdock
+    dns: 172.17.42.1
